@@ -31,9 +31,11 @@
 		//open a new connection to the server
 		$socket = new TSocket('your.bukkitserver.org', 21111);
 		
-		// note: you must use the TFramedTransport
-		// TBufferedTransport is not compatible with SwiftApi
-		$transport = new TFramedTransport($socket);
+		// note: you must use the TFramedTransport if using SwiftApi 0.5 or greater
+		// for versions prior to 0.5, use TBufferedTransport
+		//$transport = new TFramedTransport($socket);
+		$transport = new TBufferedTransport($socket);
+		
 		$protocol = new TBinaryProtocol($transport);
 
 		echo "Creating client...<br />";
