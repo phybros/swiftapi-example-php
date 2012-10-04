@@ -31,6 +31,7 @@ interface SwiftApiIf {
   public function getWhitelist($authString);
   public function getWorld($authString, $worldName);
   public function getWorlds($authString);
+  public function installPlugin($authString, $downloadUrl, $md5);
   public function kick($authString, $name, $message);
   public function op($authString, $name, $notifyPlayer);
   public function ping($authString);
@@ -1221,6 +1222,65 @@ class SwiftApiClient implements SwiftApiIf {
       throw $result->aex;
     }
     throw new Exception("getWorlds failed: unknown result");
+  }
+
+  public function installPlugin($authString, $downloadUrl, $md5)
+  {
+    $this->send_installPlugin($authString, $downloadUrl, $md5);
+    return $this->recv_installPlugin();
+  }
+
+  public function send_installPlugin($authString, $downloadUrl, $md5)
+  {
+    $args = new SwiftApi_installPlugin_args();
+    $args->authString = $authString;
+    $args->downloadUrl = $downloadUrl;
+    $args->md5 = $md5;
+    $bin_accel = ($this->output_ instanceof TProtocol::$TBINARYPROTOCOLACCELERATED) && function_exists('thrift_protocol_write_binary');
+    if ($bin_accel)
+    {
+      thrift_protocol_write_binary($this->output_, 'installPlugin', TMessageType::CALL, $args, $this->seqid_, $this->output_->isStrictWrite());
+    }
+    else
+    {
+      $this->output_->writeMessageBegin('installPlugin', TMessageType::CALL, $this->seqid_);
+      $args->write($this->output_);
+      $this->output_->writeMessageEnd();
+      $this->output_->getTransport()->flush();
+    }
+  }
+
+  public function recv_installPlugin()
+  {
+    $bin_accel = ($this->input_ instanceof TProtocol::$TBINARYPROTOCOLACCELERATED) && function_exists('thrift_protocol_read_binary');
+    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, 'SwiftApi_installPlugin_result', $this->input_->isStrictRead());
+    else
+    {
+      $rseqid = 0;
+      $fname = null;
+      $mtype = 0;
+
+      $this->input_->readMessageBegin($fname, $mtype, $rseqid);
+      if ($mtype == TMessageType::EXCEPTION) {
+        $x = new TApplicationException();
+        $x->read($this->input_);
+        $this->input_->readMessageEnd();
+        throw $x;
+      }
+      $result = new SwiftApi_installPlugin_result();
+      $result->read($this->input_);
+      $this->input_->readMessageEnd();
+    }
+    if ($result->success !== null) {
+      return $result->success;
+    }
+    if ($result->aex !== null) {
+      throw $result->aex;
+    }
+    if ($result->dex !== null) {
+      throw $result->dex;
+    }
+    throw new Exception("installPlugin failed: unknown result");
   }
 
   public function kick($authString, $name, $message)
@@ -6078,6 +6138,234 @@ class SwiftApi_getWorlds_result {
     if ($this->aex !== null) {
       $xfer += $output->writeFieldBegin('aex', TType::STRUCT, 1);
       $xfer += $this->aex->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class SwiftApi_installPlugin_args {
+  static $_TSPEC;
+
+  public $authString = null;
+  public $downloadUrl = null;
+  public $md5 = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'authString',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'downloadUrl',
+          'type' => TType::STRING,
+          ),
+        3 => array(
+          'var' => 'md5',
+          'type' => TType::STRING,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['authString'])) {
+        $this->authString = $vals['authString'];
+      }
+      if (isset($vals['downloadUrl'])) {
+        $this->downloadUrl = $vals['downloadUrl'];
+      }
+      if (isset($vals['md5'])) {
+        $this->md5 = $vals['md5'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'SwiftApi_installPlugin_args';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->authString);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->downloadUrl);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->md5);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('SwiftApi_installPlugin_args');
+    if ($this->authString !== null) {
+      $xfer += $output->writeFieldBegin('authString', TType::STRING, 1);
+      $xfer += $output->writeString($this->authString);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->downloadUrl !== null) {
+      $xfer += $output->writeFieldBegin('downloadUrl', TType::STRING, 2);
+      $xfer += $output->writeString($this->downloadUrl);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->md5 !== null) {
+      $xfer += $output->writeFieldBegin('md5', TType::STRING, 3);
+      $xfer += $output->writeString($this->md5);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class SwiftApi_installPlugin_result {
+  static $_TSPEC;
+
+  public $success = null;
+  public $aex = null;
+  public $dex = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        0 => array(
+          'var' => 'success',
+          'type' => TType::BOOL,
+          ),
+        1 => array(
+          'var' => 'aex',
+          'type' => TType::STRUCT,
+          'class' => 'EAuthException',
+          ),
+        2 => array(
+          'var' => 'dex',
+          'type' => TType::STRUCT,
+          'class' => 'EDataException',
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['success'])) {
+        $this->success = $vals['success'];
+      }
+      if (isset($vals['aex'])) {
+        $this->aex = $vals['aex'];
+      }
+      if (isset($vals['dex'])) {
+        $this->dex = $vals['dex'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'SwiftApi_installPlugin_result';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 0:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->success);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 1:
+          if ($ftype == TType::STRUCT) {
+            $this->aex = new EAuthException();
+            $xfer += $this->aex->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRUCT) {
+            $this->dex = new EDataException();
+            $xfer += $this->dex->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('SwiftApi_installPlugin_result');
+    if ($this->success !== null) {
+      $xfer += $output->writeFieldBegin('success', TType::BOOL, 0);
+      $xfer += $output->writeBool($this->success);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->aex !== null) {
+      $xfer += $output->writeFieldBegin('aex', TType::STRUCT, 1);
+      $xfer += $this->aex->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->dex !== null) {
+      $xfer += $output->writeFieldBegin('dex', TType::STRUCT, 2);
+      $xfer += $this->dex->write($output);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
