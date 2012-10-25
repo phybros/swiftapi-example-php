@@ -18,7 +18,8 @@ interface SwiftApiIf {
   public function getBannedIps($authString);
   public function getBannedPlayers($authString);
   public function getBukkitVersion($authString);
-  public function getConsoleMessages($authString);
+  public function getConsoleMessages($authString, $since);
+  public function getFileContents($authString, $fileName);
   public function getOfflinePlayer($authString, $name);
   public function getOfflinePlayers($authString);
   public function getOps($authString);
@@ -40,6 +41,7 @@ interface SwiftApiIf {
   public function replacePlugin($authString, $pluginName, $downloadUrl, $md5);
   public function runConsoleCommand($authString, $command);
   public function saveWorld($authString, $worldName);
+  public function setFileContents($authString, $fileName, $fileContents);
   public function setGameMode($authString, $name, $mode);
   public function setPvp($authString, $worldName, $isPvp);
   public function setStorm($authString, $worldName, $hasStorm);
@@ -506,16 +508,17 @@ class SwiftApiClient implements SwiftApiIf {
     throw new Exception("getBukkitVersion failed: unknown result");
   }
 
-  public function getConsoleMessages($authString)
+  public function getConsoleMessages($authString, $since)
   {
-    $this->send_getConsoleMessages($authString);
+    $this->send_getConsoleMessages($authString, $since);
     return $this->recv_getConsoleMessages();
   }
 
-  public function send_getConsoleMessages($authString)
+  public function send_getConsoleMessages($authString, $since)
   {
     $args = new SwiftApi_getConsoleMessages_args();
     $args->authString = $authString;
+    $args->since = $since;
     $bin_accel = ($this->output_ instanceof TProtocol::$TBINARYPROTOCOLACCELERATED) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
     {
@@ -558,6 +561,64 @@ class SwiftApiClient implements SwiftApiIf {
       throw $result->aex;
     }
     throw new Exception("getConsoleMessages failed: unknown result");
+  }
+
+  public function getFileContents($authString, $fileName)
+  {
+    $this->send_getFileContents($authString, $fileName);
+    return $this->recv_getFileContents();
+  }
+
+  public function send_getFileContents($authString, $fileName)
+  {
+    $args = new SwiftApi_getFileContents_args();
+    $args->authString = $authString;
+    $args->fileName = $fileName;
+    $bin_accel = ($this->output_ instanceof TProtocol::$TBINARYPROTOCOLACCELERATED) && function_exists('thrift_protocol_write_binary');
+    if ($bin_accel)
+    {
+      thrift_protocol_write_binary($this->output_, 'getFileContents', TMessageType::CALL, $args, $this->seqid_, $this->output_->isStrictWrite());
+    }
+    else
+    {
+      $this->output_->writeMessageBegin('getFileContents', TMessageType::CALL, $this->seqid_);
+      $args->write($this->output_);
+      $this->output_->writeMessageEnd();
+      $this->output_->getTransport()->flush();
+    }
+  }
+
+  public function recv_getFileContents()
+  {
+    $bin_accel = ($this->input_ instanceof TProtocol::$TBINARYPROTOCOLACCELERATED) && function_exists('thrift_protocol_read_binary');
+    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, 'SwiftApi_getFileContents_result', $this->input_->isStrictRead());
+    else
+    {
+      $rseqid = 0;
+      $fname = null;
+      $mtype = 0;
+
+      $this->input_->readMessageBegin($fname, $mtype, $rseqid);
+      if ($mtype == TMessageType::EXCEPTION) {
+        $x = new TApplicationException();
+        $x->read($this->input_);
+        $this->input_->readMessageEnd();
+        throw $x;
+      }
+      $result = new SwiftApi_getFileContents_result();
+      $result->read($this->input_);
+      $this->input_->readMessageEnd();
+    }
+    if ($result->success !== null) {
+      return $result->success;
+    }
+    if ($result->aex !== null) {
+      throw $result->aex;
+    }
+    if ($result->dex !== null) {
+      throw $result->dex;
+    }
+    throw new Exception("getFileContents failed: unknown result");
   }
 
   public function getOfflinePlayer($authString, $name)
@@ -1674,6 +1735,65 @@ class SwiftApiClient implements SwiftApiIf {
       throw $result->dex;
     }
     throw new Exception("saveWorld failed: unknown result");
+  }
+
+  public function setFileContents($authString, $fileName, $fileContents)
+  {
+    $this->send_setFileContents($authString, $fileName, $fileContents);
+    return $this->recv_setFileContents();
+  }
+
+  public function send_setFileContents($authString, $fileName, $fileContents)
+  {
+    $args = new SwiftApi_setFileContents_args();
+    $args->authString = $authString;
+    $args->fileName = $fileName;
+    $args->fileContents = $fileContents;
+    $bin_accel = ($this->output_ instanceof TProtocol::$TBINARYPROTOCOLACCELERATED) && function_exists('thrift_protocol_write_binary');
+    if ($bin_accel)
+    {
+      thrift_protocol_write_binary($this->output_, 'setFileContents', TMessageType::CALL, $args, $this->seqid_, $this->output_->isStrictWrite());
+    }
+    else
+    {
+      $this->output_->writeMessageBegin('setFileContents', TMessageType::CALL, $this->seqid_);
+      $args->write($this->output_);
+      $this->output_->writeMessageEnd();
+      $this->output_->getTransport()->flush();
+    }
+  }
+
+  public function recv_setFileContents()
+  {
+    $bin_accel = ($this->input_ instanceof TProtocol::$TBINARYPROTOCOLACCELERATED) && function_exists('thrift_protocol_read_binary');
+    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, 'SwiftApi_setFileContents_result', $this->input_->isStrictRead());
+    else
+    {
+      $rseqid = 0;
+      $fname = null;
+      $mtype = 0;
+
+      $this->input_->readMessageBegin($fname, $mtype, $rseqid);
+      if ($mtype == TMessageType::EXCEPTION) {
+        $x = new TApplicationException();
+        $x->read($this->input_);
+        $this->input_->readMessageEnd();
+        throw $x;
+      }
+      $result = new SwiftApi_setFileContents_result();
+      $result->read($this->input_);
+      $this->input_->readMessageEnd();
+    }
+    if ($result->success !== null) {
+      return $result->success;
+    }
+    if ($result->aex !== null) {
+      throw $result->aex;
+    }
+    if ($result->dex !== null) {
+      throw $result->dex;
+    }
+    throw new Exception("setFileContents failed: unknown result");
   }
 
   public function setGameMode($authString, $name, $mode)
@@ -3604,6 +3724,7 @@ class SwiftApi_getConsoleMessages_args {
   static $_TSPEC;
 
   public $authString = null;
+  public $since = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -3612,11 +3733,18 @@ class SwiftApi_getConsoleMessages_args {
           'var' => 'authString',
           'type' => TType::STRING,
           ),
+        2 => array(
+          'var' => 'since',
+          'type' => TType::I64,
+          ),
         );
     }
     if (is_array($vals)) {
       if (isset($vals['authString'])) {
         $this->authString = $vals['authString'];
+      }
+      if (isset($vals['since'])) {
+        $this->since = $vals['since'];
       }
     }
   }
@@ -3647,6 +3775,13 @@ class SwiftApi_getConsoleMessages_args {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 2:
+          if ($ftype == TType::I64) {
+            $xfer += $input->readI64($this->since);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         default:
           $xfer += $input->skip($ftype);
           break;
@@ -3663,6 +3798,11 @@ class SwiftApi_getConsoleMessages_args {
     if ($this->authString !== null) {
       $xfer += $output->writeFieldBegin('authString', TType::STRING, 1);
       $xfer += $output->writeString($this->authString);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->since !== null) {
+      $xfer += $output->writeFieldBegin('since', TType::I64, 2);
+      $xfer += $output->writeI64($this->since);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -3785,6 +3925,214 @@ class SwiftApi_getConsoleMessages_result {
     if ($this->aex !== null) {
       $xfer += $output->writeFieldBegin('aex', TType::STRUCT, 1);
       $xfer += $this->aex->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class SwiftApi_getFileContents_args {
+  static $_TSPEC;
+
+  public $authString = null;
+  public $fileName = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'authString',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'fileName',
+          'type' => TType::STRING,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['authString'])) {
+        $this->authString = $vals['authString'];
+      }
+      if (isset($vals['fileName'])) {
+        $this->fileName = $vals['fileName'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'SwiftApi_getFileContents_args';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->authString);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->fileName);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('SwiftApi_getFileContents_args');
+    if ($this->authString !== null) {
+      $xfer += $output->writeFieldBegin('authString', TType::STRING, 1);
+      $xfer += $output->writeString($this->authString);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->fileName !== null) {
+      $xfer += $output->writeFieldBegin('fileName', TType::STRING, 2);
+      $xfer += $output->writeString($this->fileName);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class SwiftApi_getFileContents_result {
+  static $_TSPEC;
+
+  public $success = null;
+  public $aex = null;
+  public $dex = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        0 => array(
+          'var' => 'success',
+          'type' => TType::STRING,
+          ),
+        1 => array(
+          'var' => 'aex',
+          'type' => TType::STRUCT,
+          'class' => 'EAuthException',
+          ),
+        2 => array(
+          'var' => 'dex',
+          'type' => TType::STRUCT,
+          'class' => 'EDataException',
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['success'])) {
+        $this->success = $vals['success'];
+      }
+      if (isset($vals['aex'])) {
+        $this->aex = $vals['aex'];
+      }
+      if (isset($vals['dex'])) {
+        $this->dex = $vals['dex'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'SwiftApi_getFileContents_result';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 0:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->success);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 1:
+          if ($ftype == TType::STRUCT) {
+            $this->aex = new EAuthException();
+            $xfer += $this->aex->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRUCT) {
+            $this->dex = new EDataException();
+            $xfer += $this->dex->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('SwiftApi_getFileContents_result');
+    if ($this->success !== null) {
+      $xfer += $output->writeFieldBegin('success', TType::STRING, 0);
+      $xfer += $output->writeString($this->success);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->aex !== null) {
+      $xfer += $output->writeFieldBegin('aex', TType::STRUCT, 1);
+      $xfer += $this->aex->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->dex !== null) {
+      $xfer += $output->writeFieldBegin('dex', TType::STRUCT, 2);
+      $xfer += $this->dex->write($output);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -7803,6 +8151,234 @@ class SwiftApi_saveWorld_result {
   public function write($output) {
     $xfer = 0;
     $xfer += $output->writeStructBegin('SwiftApi_saveWorld_result');
+    if ($this->success !== null) {
+      $xfer += $output->writeFieldBegin('success', TType::BOOL, 0);
+      $xfer += $output->writeBool($this->success);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->aex !== null) {
+      $xfer += $output->writeFieldBegin('aex', TType::STRUCT, 1);
+      $xfer += $this->aex->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->dex !== null) {
+      $xfer += $output->writeFieldBegin('dex', TType::STRUCT, 2);
+      $xfer += $this->dex->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class SwiftApi_setFileContents_args {
+  static $_TSPEC;
+
+  public $authString = null;
+  public $fileName = null;
+  public $fileContents = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'authString',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'fileName',
+          'type' => TType::STRING,
+          ),
+        3 => array(
+          'var' => 'fileContents',
+          'type' => TType::STRING,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['authString'])) {
+        $this->authString = $vals['authString'];
+      }
+      if (isset($vals['fileName'])) {
+        $this->fileName = $vals['fileName'];
+      }
+      if (isset($vals['fileContents'])) {
+        $this->fileContents = $vals['fileContents'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'SwiftApi_setFileContents_args';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->authString);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->fileName);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->fileContents);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('SwiftApi_setFileContents_args');
+    if ($this->authString !== null) {
+      $xfer += $output->writeFieldBegin('authString', TType::STRING, 1);
+      $xfer += $output->writeString($this->authString);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->fileName !== null) {
+      $xfer += $output->writeFieldBegin('fileName', TType::STRING, 2);
+      $xfer += $output->writeString($this->fileName);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->fileContents !== null) {
+      $xfer += $output->writeFieldBegin('fileContents', TType::STRING, 3);
+      $xfer += $output->writeString($this->fileContents);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class SwiftApi_setFileContents_result {
+  static $_TSPEC;
+
+  public $success = null;
+  public $aex = null;
+  public $dex = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        0 => array(
+          'var' => 'success',
+          'type' => TType::BOOL,
+          ),
+        1 => array(
+          'var' => 'aex',
+          'type' => TType::STRUCT,
+          'class' => 'EAuthException',
+          ),
+        2 => array(
+          'var' => 'dex',
+          'type' => TType::STRUCT,
+          'class' => 'EDataException',
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['success'])) {
+        $this->success = $vals['success'];
+      }
+      if (isset($vals['aex'])) {
+        $this->aex = $vals['aex'];
+      }
+      if (isset($vals['dex'])) {
+        $this->dex = $vals['dex'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'SwiftApi_setFileContents_result';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 0:
+          if ($ftype == TType::BOOL) {
+            $xfer += $input->readBool($this->success);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 1:
+          if ($ftype == TType::STRUCT) {
+            $this->aex = new EAuthException();
+            $xfer += $this->aex->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRUCT) {
+            $this->dex = new EDataException();
+            $xfer += $this->dex->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('SwiftApi_setFileContents_result');
     if ($this->success !== null) {
       $xfer += $output->writeFieldBegin('success', TType::BOOL, 0);
       $xfer += $output->writeBool($this->success);

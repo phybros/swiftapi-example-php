@@ -14,6 +14,7 @@ $GLOBALS['E_ErrorCode'] = array(
   'NOT_FOUND' => 2,
   'DOWNLOAD_ERROR' => 3,
   'FILE_ERROR' => 4,
+  'NO_READ' => 5,
 );
 
 final class ErrorCode {
@@ -22,12 +23,14 @@ final class ErrorCode {
   const NOT_FOUND = 2;
   const DOWNLOAD_ERROR = 3;
   const FILE_ERROR = 4;
+  const NO_READ = 5;
   static public $__names = array(
     0 => 'INVALID_REQUEST',
     1 => 'INVALID_AUTHSTRING',
     2 => 'NOT_FOUND',
     3 => 'DOWNLOAD_ERROR',
     4 => 'FILE_ERROR',
+    5 => 'NO_READ',
   );
 }
 

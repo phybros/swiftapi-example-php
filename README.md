@@ -10,4 +10,7 @@ Requirements
 
 Instructions
 ----
-Just drop all files into a web-accessible directory on your development machine.
+
+* Make sure your Bukkit server has SwiftApi installed (http://dev.bukkit.org/sever-mods/swiftapi)
+* Drop all files into a web server on your development machine
+* Set your server's details in `index.php` and start clicking.
