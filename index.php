@@ -2,7 +2,16 @@
 	/**
 	 *	The PHP SwiftApi Test Suite
 	 *  ===========================
-	 *
+	 */
+	 
+	/* Change These to match your server's settings */
+	$host = "localhost";
+	$port = 21111;
+	$username = "admin";
+	$password = "password";
+	$salt = "saltines";
+	 
+	/*
 	 *	Author: Will Warren (https://github.com/phybros)
 	 *
 	 *	To call SwiftApi methods, there are 7 steps:
@@ -16,12 +25,6 @@
 	 *		7. Close the connection
 	 */
 
-	// Change these
-	$host = "localhost";
-	$port = 21111;
-	$username = "admin";
-	$password = "password";
-	$salt = "saltines";
  
 	// change this to wherever you put the thrift library
 	$GLOBALS['THRIFT_ROOT'] = dirname(__FILE__) . "/thrift";
@@ -145,6 +148,13 @@
 					$r = $client->announce(getAuthString("announce"), $message);
 					var_dump($r);
 					break;
+				/***************************** deOp *****************************/
+				case "deOp":
+					$playerName = $_POST['playerName'];
+					$notify = isset($_POST['notify']);
+					$r = $client->deOp(getAuthString("deOp"), $playerName, $notify);
+					var_dump($r);
+					break;
 				/***************************** getBukkitVersion *****************************/
 				case "getBukkitVersion":
 					$bukkitVersion = $client->getBukkitVersion(getAuthString("getBukkitVersion"));
@@ -218,6 +228,13 @@
 					$result = $client->installPlugin(getAuthString("installPlugin"), $downloadUrl, $md5);		
 					var_dump($result);
 					break;
+				/***************************** op *****************************/
+				case "op":
+					$playerName = $_POST['playerName'];
+					$notify = isset($_POST['notify']);
+					$r = $client->op(getAuthString("op"), $playerName, $notify);
+					var_dump($r);
+					break;
 				/****************************** reloadServer ******************************/
 				case "reloadServer":
 					// reload the server's configuration
@@ -260,6 +277,15 @@
 			<p>Message<br /><input type="text" name="message" /></p>
 			<input name="submit" type="submit" value="Execute" />
 			<input type="hidden" name="operation" value="announce" />
+		</form>
+		<hr />
+
+		<h2>deOp<small>(authString, playerName)</small></h2>
+		<form action="#results" method="post">
+			<p>Player Name<br /><input type="text" name="playerName" /></p>
+			<p>Notify?<br /><input type="checkbox" name="notify" value="Y" /></p>
+			<input name="submit" type="submit" value="Execute" />
+			<input type="hidden" name="operation" value="deOp" />
 		</form>
 		<hr />
 		
@@ -326,6 +352,15 @@
 		<form action="#results" method="post">
 			<input name="submit" type="submit" value="Execute" />
 			<input type="hidden" name="operation" value="getServer" />
+		</form>
+		<hr />
+		
+		<h2>op<small>(authString, playerName)</small></h2>
+		<form action="#results" method="post">
+			<p>Player Name<br /><input type="text" name="playerName" /></p>
+			<p>Notify?<br /><input type="checkbox" name="notify" value="Y" /></p>
+			<input name="submit" type="submit" value="Execute" />
+			<input type="hidden" name="operation" value="op" />
 		</form>
 		<hr />
 		
