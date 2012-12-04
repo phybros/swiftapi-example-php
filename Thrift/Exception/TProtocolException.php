@@ -17,34 +17,32 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
+ * @package thrift.protocol
+ * @author: rmarin (marin.radu@facebook.com)
  */
 
-namespace Thrift\Transport;
+namespace Thrift\Exception;
 
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+use Thrift\Exception\TException;
 
 /**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
+ * Protocol module. Contains all the types and definitions needed to implement
+ * a protocol encoder/decoder.
  *
- * @package thrift.transport
+ * @package thrift.protocol
  */
-class TNullTransport extends TTransport {
 
-  public function isOpen() {
-    return true;
+/**
+ * Protocol exceptions
+ */
+class TProtocolException extends TException {
+  const UNKNOWN = 0;
+  const INVALID_DATA = 1;
+  const NEGATIVE_SIZE = 2;
+  const SIZE_LIMIT = 3;
+  const BAD_VERSION = 4;
+
+  function __construct($message=null, $code=0) {
+    parent::__construct($message, $code);
   }
-
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
-  }
-
-  public function write($buf) {}
-
 }

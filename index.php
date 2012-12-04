@@ -27,20 +27,22 @@
 
  
 	// change this to wherever you put the thrift library
-	$GLOBALS['THRIFT_ROOT'] = dirname(__FILE__) . "/thrift";
+	$THRIFT_ROOT = dirname(__FILE__);
 	
-	// you have to put your gen-php code into the packages folder
-	$swiftroot = $GLOBALS['THRIFT_ROOT'] . "/packages";
-	
-	//swiftapi includes
-	require_once $swiftroot . "/SwiftApi/SwiftApi.php";
-	require_once $swiftroot . "/SwiftApi/SwiftApi_types.php";
-	require_once $swiftroot . "/Errors/Errors_types.php";
-	
-	//thrift includes
-	require_once $GLOBALS['THRIFT_ROOT'] . "/transport/TSocket.php";
-	require_once $GLOBALS['THRIFT_ROOT'] . "/transport/TFramedTransport.php";
-	require_once $GLOBALS['THRIFT_ROOT'] . "/protocol/TBinaryProtocol.php";
+	require_once $THRIFT_ROOT . '/Thrift/ClassLoader/ThriftClassLoader.php';
+	use Thrift\ClassLoader\ThriftClassLoader;
+
+	$loader = new ThriftClassLoader();
+	$loader->registerNamespace('Thrift', $THRIFT_ROOT);
+	$loader->registerDefinition('Thrift', $THRIFT_ROOT . '/packages');
+	$loader->register();
+
+	use Thrift\Transport\TSocket;
+	use Thrift\Transport\TFramedTransport;
+	use Thrift\Protocol\TBinaryProtocol;
+
+	require_once $THRIFT_ROOT . '/Thrift/packages/org/phybros/thrift/SwiftApi.php';
+	require_once $THRIFT_ROOT . '/Thrift/packages/org/phybros/thrift/Types.php';
 
 	// Create an authString!
 	function getAuthString($methodName) {
@@ -126,7 +128,7 @@
 			echo "Creating client...";
 			
 			// 4. Create a new SwiftApiClient object using the protocol
-			$client= new SwiftApiClient($protocol, $protocol);
+			$client = new org\phybros\thrift\SwiftApiClient($protocol, $protocol);
 			
 			echo "Done<br />";
 			
@@ -241,6 +243,12 @@
 					$client->reloadServer(getAuthString("reloadServer"));
 					echo "Results not applicable, reloadServer is a oneway (void) method";
 					break;
+				/****************************** reloadServer ******************************/
+				case "runConsoleCommand":
+					$command = $_POST['command'];
+					$client->runConsoleCommand(getAuthString("runConsoleCommand"), $command);
+					echo "Results not applicable, runConsoleCommand is a oneway (void) method";
+					break;
 				/***************************** setFileContents ****************************/
 				case "setFileContents":
 					//the file name
@@ -249,6 +257,13 @@
 					
 					//get the file's contents
 					$r = $client->setFileContents(getAuthString("setFileContents"), $fileName, $fileContents);
+					var_dump($r);
+					break;
+				/***************************** setWorldTime *****************************/
+				case "setWorldTime":
+					$worldName = $_POST['worldName'];
+					$time = $_POST['time'];
+					$r = $client->setWorldTime(getAuthString("setWorldTime"), $worldName, $time);
 					var_dump($r);
 					break;
 				/********************************* no op *********************************/					
@@ -260,13 +275,14 @@
 			echo "</div>Closing connection...";
 			$transport->close();			
 			echo "Done<br /><br />";
-		} catch (EAuthException $aex) {
+		} catch (org\phybros\thrift\EAuthException $aex) {
 			echo "</div><p><strong class=\"error\">Error:</strong><br /><br />" . $aex->errorMessage . "</p>";
-		} catch (EDataException $dex) {
-			echo "</div><p><strong class=\"error\">Error:</strong><br /><br />" . $dex->errorMessage . "</p>";
+		} catch (org\phybros\thrift\EDataException $dex) {
+			echo "</div><p><strong class=\"error\">Data Error:</strong><br /><br />" . $dex->errorMessage . "</p>";
 		} catch (Exception $e) {
-			echo "</div><p><strong class=\"error\">Error:</strong><br /><br />" . $e->getMessage() . "</p>";
+			echo "</div><p><strong class=\"error\">Unknown Error:</strong><br /><br />" . $e->getMessage() . "</p>";
 			echo "<p><strong class=\"error\">Trace:</strong><br /><pre>" . $e->getTraceAsString() . "</pre></p>";
+			var_dump($e);
 		}
 
 		echo "<hr />";
@@ -386,6 +402,14 @@
 			<input type="hidden" name="operation" value="reloadServer" />
 		</form>
 		<hr />
+
+		<h2>runConsoleCommand<small>(authString, command)</small></h2>
+		<form action="#results" method="post">
+			<p>Command<br /><input type="text" name="command" /></p>
+			<input name="submit" type="submit" value="Execute" />
+			<input type="hidden" name="operation" value="runConsoleCommand" />
+		</form>
+		<hr />
 		
 		<h2>setFileContents<small>(authString, fileName, fileContents)</small></h2>
 		<form action="#results" method="post">
@@ -395,5 +419,15 @@
 			<input type="hidden" name="operation" value="setFileContents" />
 		</form>
 		<hr />
+
+		<h2>setWorldTime<small>(authString, worldName, time)</small></h2>
+		<form action="#results" method="post">
+			<p>World Name<br /><input type="text" name="worldName" /></p>
+			<p>Time<br /><input type="text" name="time" /></p>
+			<input name="submit" type="submit" value="Execute" />
+			<input type="hidden" name="operation" value="setWorldTime" />
+		</form>
+		<hr />
+		
 	</body>
 </html>

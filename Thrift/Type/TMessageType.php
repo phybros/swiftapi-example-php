@@ -17,34 +17,17 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
+ * @package thrift
  */
 
-namespace Thrift\Transport;
-
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+namespace Thrift\Type;
 
 /**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
+ * Message types for RPC
  */
-class TNullTransport extends TTransport {
-
-  public function isOpen() {
-    return true;
-  }
-
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
-  }
-
-  public function write($buf) {}
-
+class TMessageType {
+  const CALL  = 1;
+  const REPLY = 2;
+  const EXCEPTION = 3;
+  const ONEWAY = 4;
 }

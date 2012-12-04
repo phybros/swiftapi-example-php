@@ -17,34 +17,27 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
+ * @package thrift.protocol
  */
 
-namespace Thrift\Transport;
+namespace Thrift\Factory;
 
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+use Thrift\Factory\TProtocolFactory;
+use Thrift\Protocol\TBinaryProtocol;
 
 /**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
+ * Binary Protocol Factory
  */
-class TNullTransport extends TTransport {
+class TBinaryProtocolFactory implements TProtocolFactory {
+  private $strictRead_ = false;
+  private $strictWrite_ = false;
 
-  public function isOpen() {
-    return true;
+  public function __construct($strictRead=false, $strictWrite=false) {
+    $this->strictRead_ = $strictRead;
+    $this->strictWrite_ = $strictWrite;
   }
 
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
+  public function getProtocol($trans) {
+    return new TBinaryProtocol($trans, $this->strictRead_, $this->strictWrite_);
   }
-
-  public function write($buf) {}
-
 }

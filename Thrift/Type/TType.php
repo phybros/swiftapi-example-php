@@ -17,34 +17,30 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
+ * @package thrift
  */
 
-namespace Thrift\Transport;
-
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+namespace Thrift\Type;
 
 /**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
+ * Data types that can be sent via Thrift
  */
-class TNullTransport extends TTransport {
-
-  public function isOpen() {
-    return true;
-  }
-
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
-  }
-
-  public function write($buf) {}
-
+class TType {
+  const STOP   = 0;
+  const VOID   = 1;
+  const BOOL   = 2;
+  const BYTE   = 3;
+  const I08    = 3;
+  const DOUBLE = 4;
+  const I16    = 6;
+  const I32    = 8;
+  const I64    = 10;
+  const STRING = 11;
+  const UTF7   = 11;
+  const STRUCT = 12;
+  const MAP    = 13;
+  const SET    = 14;
+  const LST    = 15;    // N.B. cannot use LIST keyword in PHP!
+  const UTF8   = 16;
+  const UTF16  = 17;
 }

@@ -17,34 +17,38 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
+ * @package thrift.protocol
  */
 
-namespace Thrift\Transport;
+namespace Thrift\Protocol\JSON;
 
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+class LookaheadReader
+{
+    private $hasData_ = false;
+    private $data_ = array();
+    private $p_;
 
-/**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
- */
-class TNullTransport extends TTransport {
+    public function __construct($p)
+    {
+        $this->p_ = $p;
+    }
 
-  public function isOpen() {
-    return true;
-  }
+    public function read() {
+        if ($this->hasData_) {
+            $this->hasData_ = false;
+        } else {
+            $this->data_ = $this->p_->getTransport()->readAll(1);
+        }
 
-  public function open() {}
+        return substr($this->data_, 0, 1);
+    }
 
-  public function close() {}
+    public function peek() {
+        if (!$this->hasData_) {
+            $this->data_ = $this->p_->getTransport()->readAll(1);
+        }
 
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
-  }
-
-  public function write($buf) {}
-
+        $this->hasData_ = true;
+        return substr($this->data_, 0, 1);
+    }
 }

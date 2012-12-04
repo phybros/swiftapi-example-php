@@ -17,34 +17,22 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
  */
 
-namespace Thrift\Transport;
+namespace Thrift\StringFunc;
 
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+use Thrift\StringFunc\TStringFunc;
 
-/**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
- */
-class TNullTransport extends TTransport {
+class Core implements TStringFunc {
+    public function substr($str, $start, $length = null) {
+        // specifying a null $length would return an empty string
+        if($length === null) {
+            return substr($str, $start);
+        }
+        return substr($str, $start, $length);
+    }
 
-  public function isOpen() {
-    return true;
-  }
-
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
-  }
-
-  public function write($buf) {}
-
+    public function strlen($str) {
+        return strlen($str);
+    }
 }

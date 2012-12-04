@@ -17,34 +17,29 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
  */
 
-namespace Thrift\Transport;
+namespace Thrift\StringFunc;
 
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+use Thrift\StringFunc\TStringFunc;
 
-/**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
- */
-class TNullTransport extends TTransport {
+class Mbstring implements TStringFunc {
+    public function substr($str, $start, $length = null) {
+        /**
+         * We need to set the charset parameter, which is the second
+         * optional parameter and the first optional parameter can't
+         * be null or false as a "magic" value because that would
+         * cause an empty string to be returned, so we need to
+         * actually calculate the proper length value.
+         */
+        if($length === null) {
+            $length = $this->strlen($str) - $start;
+        }
 
-  public function isOpen() {
-    return true;
-  }
+        return mb_substr($str, $start, $length, '8bit');
+    }
 
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
-  }
-
-  public function write($buf) {}
-
+    public function strlen($str) {
+        return mb_strlen($str, '8bit');
+    }
 }

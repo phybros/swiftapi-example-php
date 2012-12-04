@@ -17,34 +17,23 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
+ * @package thrift.protocol
  */
 
-namespace Thrift\Transport;
+namespace Thrift\Protocol\JSON;
 
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+class BaseContext
+{
+    function escapeNum()
+    {
+        return false;
+    }
 
-/**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
- */
-class TNullTransport extends TTransport {
+    function write()
+    {
+    }
 
-  public function isOpen() {
-    return true;
-  }
-
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
-  }
-
-  public function write($buf) {}
-
+    function read()
+    {
+    }
 }

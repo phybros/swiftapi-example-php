@@ -17,34 +17,31 @@
  * specific language governing permissions and limitations
  * under the License.
  *
- * @package thrift.transport
+ * @package thrift.protocol
  */
 
-namespace Thrift\Transport;
+namespace Thrift\Protocol;
 
-use Thrift\Transport\TTransport;
-use Thrift\Exception\TTransportException;
+use Thrift\Protocol\TBinaryProtocol;
+use Thrift\Transport\TBufferedTransport;
 
 /**
- * Transport that only accepts writes and ignores them.
- * This is useful for measuring the serialized size of structures.
- *
- * @package thrift.transport
+ * Accelerated binary protocol: used in conjunction with the thrift_protocol
+ * extension for faster deserialization
  */
-class TNullTransport extends TTransport {
-
-  public function isOpen() {
-    return true;
+class TBinaryProtocolAccelerated extends TBinaryProtocol {
+  public function __construct($trans, $strictRead=false, $strictWrite=true) {
+    // If the transport doesn't implement putBack, wrap it in a
+    // TBufferedTransport (which does)
+    if (!method_exists($trans, 'putBack')) {
+      $trans = new TBufferedTransport($trans);
+    }
+    parent::__construct($trans, $strictRead, $strictWrite);
   }
-
-  public function open() {}
-
-  public function close() {}
-
-  public function read($len) {
-    throw new TTransportException("Can't read from TNullTransport.");
+  public function isStrictRead() {
+    return $this->strictRead_;
   }
-
-  public function write($buf) {}
-
+  public function isStrictWrite() {
+    return $this->strictWrite_;
+  }
 }
